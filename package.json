@@ -1,0 +1,14 @@
+{
+  "name": "server_go",
+  "version": "0.0.1",
+  "dependencies": {
+    "require.js": "^1.0.0",
+    "shortid": "latest",
+    "socket.io": "latest",
+    "websocket": "^1.0.24",
+    "logic.js": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "^4.2.4"
+  }
+}

@@ -18,29 +18,31 @@ io.on('connection', function(socket) {
 
     console.log(users);
 
-    // if (true){
-    //     console.log(users);
-    //     io.sockets.sockets[users[0]].emit('START_ATTRIBUTES',{
-    //         name:'black',
-    //         color:1,
-    //         scores:0
-    //     });
-    //
-    //     io.sockets.sockets[users[0]].on('POSITION', function (data) {
-    //         console.log(data);
-    //     })
+    if (users.length === 1){
+        socket.emit('WAIT');
+    }
 
-
-    //socket.emit('WAITING_FOR_ANOTHER_PLAYER');
-
-
+    socket.on('disconnect', function () {
+        console.log(socket.id + ' disconnect');
+        users.splice(users.indexOf(socket.id), 1);
+    });
 
     if (users.length === 2) {     //users.length === 2
 
-        //TODO create room
-        createRoom(users, roomID.toString());
-        //TODO---------------------
+        io.sockets.sockets[users[0]].emit('START');
+        io.sockets.sockets[users[1]].emit('START');
 
+        var currentUsers = [];
+
+        currentUsers.push(users[0]);
+        currentUsers.push(users[1]);
+
+        users = [];
+        roomID++;
+
+        //TODO create room
+        createRoom(currentUsers, roomID.toString());
+        //TODO---------------------
 
 
     }
@@ -82,8 +84,6 @@ io.on('connection', function(socket) {
         //io.sockets.in(roomID).emit('FINISH_MOVE', "tapappaap");
 
 
-        //users.clear();
-        roomID++;
     //}
     // io.sockets.sockets[users[0]].on('beep', function (data) {
     //     console.log(data);
@@ -106,6 +106,10 @@ io.on('connection', function(socket) {
 
 function createRoom(users, roomID) {
 
+    var scores = [];
+    scores.push(0);
+    scores.push(0);
+
     var type = initMatrix();
     io.sockets.sockets[users[0]].emit('START_ATTRIBUTES',{
         name:'black',
@@ -121,11 +125,19 @@ function createRoom(users, roomID) {
     //start game
 
     var turn = 0;
+    var whitePassed = false;
+    var blackPassed = false;
 
     //io.sockets.sockets[users[0]].emit('START');
     //io.sockets.sockets[users[1]].emit('WAIT');
 
+
     for (var i = 0; i < 2; i++){
+
+        io.sockets.sockets[users[turn % 2 === 0 ? 0 : 1]].emit('PLAY');
+        io.sockets.sockets[users[turn % 2 === 0 ? 1 : 0]].emit('PAUSE');
+        console.log(turn);
+
         io.sockets.sockets[users[i]].on('POSITION', function (data) {
             console.log(data);
 
@@ -133,8 +145,8 @@ function createRoom(users, roomID) {
             type[parseInt(data.row)][parseInt(data.col)] = parseInt(data.color) === 1 ? 1 : 2;
 
             //TODO: TEST OF PASS
-            type = captureTest(type, 1, 2);
-            type = captureTest(type, 2, 1);
+            captureTest(type, 1, 2);
+            captureTest(type, 2, 1);
 
             console.log(type);
             var k = 0;
@@ -149,14 +161,17 @@ function createRoom(users, roomID) {
             //console.log(smth);
             io.sockets.sockets[users[0]].emit('FINISH_MOVE', smth);
             io.sockets.sockets[users[1]].emit('FINISH_MOVE', smth);
-
+            turn++;
+            io.sockets.sockets[users[turn % 2 === 0 ? 0 : 1]].emit('PLAY');
+            io.sockets.sockets[users[turn % 2 === 0 ? 1 : 0]].emit('PAUSE');
             //io.sockets.sockets[users[i === 0 ? 1 : 0]].emit('WAIT');
         });
     }
 
 }
 
-function captureTest(type, a, b) {
+function captureTest(type, a, b, scores) {
+
     var eatenList = [];
     //List<int> whiteRocks = new List<int>();
 
@@ -348,9 +363,10 @@ function captureTest(type, a, b) {
                                                 // var mr =
                                                 //    GameObject.Find((l * 9 + m).ToString()).GetComponent<SpriteRenderer>();
                                                 if (b === 1) {
-                                                    //GameBoard.game.WhitePlayer.Score++;
+                                                    scores[1]++;
                                                 }
                                                 else {
+                                                    scores[0]++;
                                                     //GameBoard.game.BlackPlayer.Score++;
                                                 }
                                                 // mr.enabled = false;
@@ -397,7 +413,6 @@ function captureTest(type, a, b) {
 
         }
     }
-    return type;
 }
 
 // function captureTest(type, a, b) {

@@ -131,16 +131,34 @@ function createRoom(users, roomID) {
     //io.sockets.sockets[users[0]].emit('START');
     //io.sockets.sockets[users[1]].emit('WAIT');
 
+    io.sockets.sockets[users[0]].on('BLACK_PASSED', function () {
+        console.log('black passed');
+        blackPassed = true;
+        io.sockets.sockets[users[1]].emit('PLAY');
+        io.sockets.sockets[users[0]].emit('PAUSE');
+        if (blackPassed && whitePassed) console.log('FINISH');
+    });
 
-    for (var i = 0; i < 2; i++){
+    io.sockets.sockets[users[1]].on('WHITE_PASSED', function () {
+        console.log('white passed');
+        whitePassed = true;
+        io.sockets.sockets[users[0]].emit('PLAY');
+        io.sockets.sockets[users[1]].emit('PAUSE');
+        if (blackPassed && whitePassed) console.log('FINISH');
+    });
+
+    console.log(blackPassed + ' ' + whitePassed);
+
+
+    for (var i = 0; i < 2; i++) {
 
         io.sockets.sockets[users[turn % 2 === 0 ? 0 : 1]].emit('PLAY');
         io.sockets.sockets[users[turn % 2 === 0 ? 1 : 0]].emit('PAUSE');
-        console.log(turn);
 
+
+        console.log(i);
         io.sockets.sockets[users[i]].on('POSITION', function (data) {
             console.log(data);
-
 
             type[parseInt(data.row)][parseInt(data.col)] = parseInt(data.color) === 1 ? 1 : 2;
 
@@ -151,22 +169,28 @@ function createRoom(users, roomID) {
             console.log(type);
             var k = 0;
             var smth = {};
-            for (var i = 0; i < 9; i++){
-                for (var j = 0; j < 9; j++){
+            for (var i = 0; i < 9; i++) {
+                for (var j = 0; j < 9; j++) {
 
                     smth[(k++).toString()] = type[i][j];
                 }
             }
 
+
             //console.log(smth);
             io.sockets.sockets[users[0]].emit('FINISH_MOVE', smth);
             io.sockets.sockets[users[1]].emit('FINISH_MOVE', smth);
             turn++;
+            whitePassed = false;
+            blackPassed = false;
             io.sockets.sockets[users[turn % 2 === 0 ? 0 : 1]].emit('PLAY');
             io.sockets.sockets[users[turn % 2 === 0 ? 1 : 0]].emit('PAUSE');
             //io.sockets.sockets[users[i === 0 ? 1 : 0]].emit('WAIT');
+
         });
     }
+
+
 
 }
 

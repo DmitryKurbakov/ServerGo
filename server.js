@@ -128,23 +128,32 @@ function createRoom(users, roomID) {
     var whitePassed = false;
     var blackPassed = false;
 
+    var blackScores = 0;
+    var whiteScores = 0;
+
     //io.sockets.sockets[users[0]].emit('START');
     //io.sockets.sockets[users[1]].emit('WAIT');
 
     io.sockets.sockets[users[0]].on('BLACK_PASSED', function () {
         console.log('black passed');
+        turn++;
         blackPassed = true;
         io.sockets.sockets[users[1]].emit('PLAY');
         io.sockets.sockets[users[0]].emit('PAUSE');
-        if (blackPassed && whitePassed) console.log('FINISH');
+        if (blackPassed && whitePassed) {
+            console.log(finishGame(type));
+        }
     });
 
     io.sockets.sockets[users[1]].on('WHITE_PASSED', function () {
         console.log('white passed');
+        turn++;
         whitePassed = true;
         io.sockets.sockets[users[0]].emit('PLAY');
         io.sockets.sockets[users[1]].emit('PAUSE');
-        if (blackPassed && whitePassed) console.log('FINISH');
+        if (blackPassed && whitePassed) {
+            console.log(finishGame(type));
+        }
     });
 
     console.log(blackPassed + ' ' + whitePassed);
@@ -439,6 +448,61 @@ function captureTest(type, a, b, scores) {
     }
 }
 
+function scoring(type, a, b){
+
+    var score = 0;
+
+    for (var i = 0; i < 9; i++){
+        for (var j = 0; j < 9; j++){
+
+            var left = true;
+            var right = true;
+            var up = true;
+            var down = true;
+
+            if (type[i][j] === 0){
+                var k = j;
+                while (--k > 0){
+                    if (type[i][k] === b){
+                        left = false;
+                        break;
+                    }
+                }
+                k = j;
+                while (++k < 9){
+                    if (type[i][k] === b){
+                        right = false;
+                        break;
+                    }
+                }
+                k = i;
+                while (--k > 0){
+                    if (type[k][j] === b){
+                        up = false;
+                        break;
+                    }
+                }
+                k = i;
+                while (++k < 9){
+                    if (type[k][j] === b){
+                        down = false;
+                        break;
+                    }
+                }
+            }
+
+            if (left && right && up && down) score++;
+        }
+    }
+
+    for (var i = 0; i < 9; i++){
+        for (var j = 0; j < 9; j++){
+            if (type[i][j] === a) score++;
+        }
+    }
+
+    return score;
+}
 // function captureTest(type, a, b) {
 //
 //     var eatenList = [];
@@ -685,4 +749,16 @@ function initMatrix() {
     }
 
     return type;
+}
+
+function finishGame(type){
+    console.log('FINISH');
+
+    var blackScores = scoring(type, 1, 2);
+    var whiteScores = scoring(type, 2, 1);
+
+    console.log("black " + blackScores);
+    console.log("white " + whiteScores);
+
+    return blackScores > whiteScores ? "Black Win!" : "White Win!";
 }

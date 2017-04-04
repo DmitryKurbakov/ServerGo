@@ -130,8 +130,8 @@ function createRoom(users, roomID) {
                 parseInt(data.color) === 0 ? 0 : parseInt(data.color) === 1 ? 1 : 2;
 
             //TODO: TEST OF PASS
-            logic.captureTest(type, 1, 2);
-            logic.captureTest(type, 2, 1);
+            logic.captureTest(type, 1, 2, scores);
+            logic.captureTest(type, 2, 1, scores);
 
             console.log(type);
             var k = 0;

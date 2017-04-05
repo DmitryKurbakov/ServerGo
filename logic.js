@@ -230,6 +230,7 @@ module.exports = {
         }
     },
 
+
     scoring: function (type, a, b) {
 
         var score = 0;
@@ -237,37 +238,37 @@ module.exports = {
         for (var i = 0; i < 9; i++) {
             for (var j = 0; j < 9; j++) {
 
-                var left = true;
-                var right = true;
-                var up = true;
-                var down = true;
+                var left = false;
+                var right = false;
+                var up = false;
+                var down = false;
 
                 if (type[i][j] === 0) {
                     var k = j;
                     while (--k > 0) {
-                        if (type[i][k] === b) {
-                            left = false;
+                        if (type[i][k] === a) {
+                            left = true;
                             break;
                         }
                     }
                     k = j;
                     while (++k < 9) {
-                        if (type[i][k] === b) {
-                            right = false;
+                        if (type[i][k] === a) {
+                            right = true;
                             break;
                         }
                     }
                     k = i;
                     while (--k > 0) {
-                        if (type[k][j] === b) {
-                            up = false;
+                        if (type[k][j] === a) {
+                            up = true;
                             break;
                         }
                     }
                     k = i;
                     while (++k < 9) {
-                        if (type[k][j] === b) {
-                            down = false;
+                        if (type[k][j] === a) {
+                            down = true;
                             break;
                         }
                     }

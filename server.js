@@ -31,9 +31,6 @@ io.on('connection', function(socket) {
 
     if (users.length === 2) {
 
-        io.sockets.sockets[users[0]].emit('START');
-        io.sockets.sockets[users[1]].emit('START');
-
         var currentUsers = [];
 
         currentUsers.push(users[0]);
@@ -45,8 +42,6 @@ io.on('connection', function(socket) {
         //TODO create room
         createRoom(currentUsers, roomID.toString());
         //TODO---------------------
-
-
     }
 });
 
@@ -56,6 +51,9 @@ function createRoom(users, roomID) {
     var scores = [];
     scores.push(0);
     scores.push(0);
+
+    io.sockets.sockets[users[0]].emit('START_GAME');
+    io.sockets.sockets[users[1]].emit('START_GAME');
 
     var type = logic.initMatrix();
     io.sockets.sockets[users[0]].emit('START_ATTRIBUTES',{

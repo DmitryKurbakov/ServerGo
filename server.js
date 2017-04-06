@@ -8,15 +8,16 @@ var shortid = require('shortid');
 
 var users = [];
 
-var roomID = 0;
+var roomID = shortid.generate();
 
 io.attach(1337);
 
 
 io.on('connection', function(socket) {
 
+    socket.join(roomID);
+
     users.push(socket.id);
-    //socket.join(roomID.toString());
 
     console.log(users);
 
@@ -30,17 +31,19 @@ io.on('connection', function(socket) {
     });
 
     if (users.length === 2) {
+        //socket.join(roomID);
+        //console.log()
 
         var currentUsers = [];
 
         currentUsers.push(users[0]);
         currentUsers.push(users[1]);
 
+        var currentRoomID = roomID;
+        roomID = shortid.generate();
         users = [];
-        roomID++;
-
         //TODO create room
-        createRoom(currentUsers, roomID.toString());
+        createRoom(currentUsers, currentRoomID);
         //TODO---------------------
     }
 });
@@ -52,8 +55,17 @@ function createRoom(users, roomID) {
     scores.push(0);
     scores.push(0);
 
-    io.sockets.sockets[users[0]].emit('START_GAME');
-    io.sockets.sockets[users[1]].emit('START_GAME');
+    io.sockets.sockets[users[0]].on('disconnect', function () {
+        console.log(0);
+        io.to(roomID).emit("OPPONENT_DISCONNECT");
+    });
+
+    io.sockets.sockets[users[1]].on('disconnect', function () {
+        console.log(1);
+        io.to(roomID).emit("OPPONENT_DISCONNECT");
+    });
+
+    io.to(roomID).emit('START_GAME');
 
     var type = logic.initMatrix();
     io.sockets.sockets[users[0]].emit('START_ATTRIBUTES',{
@@ -83,11 +95,10 @@ function createRoom(users, roomID) {
             var winner = finishGame(type, scores);
             console.log(winner);
 
-            io.sockets.sockets[users[1]].emit('END_OF_GAME', {
-                winner: winner.toString()
-            });
-            io.sockets.sockets[users[0]].emit('END_OF_GAME',{
-                winner: winner.toString()
+            io.to(roomID).emit('END_OF_GAME', {
+                winner: winner.toString(),
+                black: scores[0].toString(),
+                white: scores[1].toString()
             });
         }
     });
@@ -102,11 +113,10 @@ function createRoom(users, roomID) {
             var winner = finishGame(type, scores);
             console.log(winner);
 
-            io.sockets.sockets[users[1]].emit('END_OF_GAME', {
-                winner: winner.toString()
-            });
-            io.sockets.sockets[users[0]].emit('END_OF_GAME',{
-                winner: winner.toString()
+            io.to(roomID).emit('END_OF_GAME', {
+                winner: winner.toString(),
+                black: scores[0].toString(),
+                white: scores[1].toString()
             });
         }
     });
@@ -142,8 +152,7 @@ function createRoom(users, roomID) {
             }
 
             //console.log(smth);
-            io.sockets.sockets[users[0]].emit('FINISH_MOVE', smth);
-            io.sockets.sockets[users[1]].emit('FINISH_MOVE', smth);
+            io.to(roomID).emit('FINISH_MOVE', smth);
             turn++;
             whitePassed = false;
             blackPassed = false;
@@ -158,12 +167,12 @@ function createRoom(users, roomID) {
 function finishGame(type, scores){
     console.log('FINISH');
 
-    var blackScores = logic.scoring(type, 1, 2) + scores[0];
-    var whiteScores = logic.scoring(type, 2, 1) + scores[1];
+    scores[0] += logic.scoring(type, 1, 2);
+    scores[1] += logic.scoring(type, 2, 1);
 
-    console.log("black " + blackScores);
-    console.log("white " + whiteScores);
+    console.log("black " + scores[0]);
+    console.log("white " + scores[1]);
 
     //1 - black, 2 - white
-    return blackScores > whiteScores ? 1 : 2;
+    return scores[0] > scores[1] ? 1 : 2;
 }

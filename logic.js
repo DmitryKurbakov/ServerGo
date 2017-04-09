@@ -298,6 +298,15 @@ module.exports = {
     }
 
     return type;
+    },
+
+    isFree: function (a) {
+        for (var i = 0; i < 9; i++){
+            for (var j = 0; j < 9; j++){
+                if (type[i][j] !== a) return false;
+            }
+        }
+        return true;
     }
 
 };

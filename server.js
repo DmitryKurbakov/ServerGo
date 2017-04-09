@@ -137,7 +137,18 @@ function createRoom(users, roomID) {
             type[parseInt(data.row)][parseInt(data.col)] =
                 parseInt(data.color) === 0 ? 0 : parseInt(data.color) === 1 ? 1 : 2;
 
-            //TODO: TEST OF PASS
+            if (logic.isFree(1) || logic.isFree(2)){
+
+                var winner = finishGame(type, scores);
+                console.log(winner);
+
+                io.to(roomID).emit('END_OF_GAME', {
+                    winner: winner.toString(),
+                    black: scores[0].toString(),
+                    white: scores[1].toString()
+                });
+            }
+
             logic.captureTest(type, 1, 2, scores);
             logic.captureTest(type, 2, 1, scores);
 

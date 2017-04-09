@@ -10,7 +10,7 @@ var users = [];
 
 var roomID = shortid.generate();
 
-io.attach(1337);
+io.attach(8080);
 
 
 io.on('connection', function(socket) {

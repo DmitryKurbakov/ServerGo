@@ -2,19 +2,7 @@
   "name": "server_go",
   "version": "0.0.1",
   "dependencies": {
-    "logic.js": "latest",
-    "main": "server.js",
-    "require.js": "^1.0.0",
-    "shortid": "latest",
     "socket.io": "latest",
-    "websocket": "^1.0.24"
-  },
-  "main": "server.js",
-  "engines": {
-    "node": "0.10.26",
-    "npm": "1.4.3"
-  },
-  "devDependencies": {
-    "@types/node": "^4.2.4"
+    "shortid": "latest"
   }
 }

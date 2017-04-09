@@ -300,7 +300,7 @@ module.exports = {
     return type;
     },
 
-    isFree: function (a) {
+    isFree: function (a, type) {
         for (var i = 0; i < 9; i++){
             for (var j = 0; j < 9; j++){
                 if (type[i][j] !== a) return false;

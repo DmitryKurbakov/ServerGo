@@ -137,7 +137,7 @@ function createRoom(users, roomID) {
             type[parseInt(data.row)][parseInt(data.col)] =
                 parseInt(data.color) === 0 ? 0 : parseInt(data.color) === 1 ? 1 : 2;
 
-            if (logic.isFree(1) || logic.isFree(2)){
+            if (logic.isFree(1, type) || logic.isFree(2, type)){
 
                 var winner = finishGame(type, scores);
                 console.log(winner);
